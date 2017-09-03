@@ -1,0 +1,6 @@
+#cloud-config
+packages:
+  - nano
+  - mc
+  - wget
+package_update: true
