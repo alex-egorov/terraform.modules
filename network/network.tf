@@ -44,10 +44,10 @@ resource "aws_route" "public_internet_gateway" {
 resource "aws_route_table" "private" {
   vpc_id           = "${aws_vpc.vpc.id}"
   propagating_vgws = ["${var.private_propagating_vgws}"]
-  count            = "${length(var.azs)}"
+  count            = "${length(var.private_subnets)}"
 
   tags {
-    Name = "${var.name}-rt-private-${element(var.azs, count.index)}"
+    Name = "${var.name}-rt-private-${element(var.private_subnets, count.index)}"
     Terraform = "Terraform"
     Created = "${var.owner}"
   }
@@ -57,7 +57,7 @@ resource "aws_route" "private_nat_gateway" {
   route_table_id         = "${element(aws_route_table.private.*.id, count.index)}"
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id         = "${element(aws_nat_gateway.natgw.*.id, count.index)}"
-  count                  = "${length(var.azs) * lookup(map(var.enable_nat_gateway, 1), "true", 0)}"
+  count                  = "${length(var.private_subnets) * lookup(map(var.enable_nat_gateway, 1), "true", 0)}"
 }
 
 ## nat gateway
@@ -105,10 +105,10 @@ resource "aws_subnet" "private" {
   vpc_id            = "${aws_vpc.vpc.id}"
   cidr_block        = "${var.private_subnets[count.index]}"
   availability_zone = "${var.azs[count.index]}"
-  count             = "${length(var.azs)}"
+  count             = "${length(var.private_subnets)}"
 
   tags {
-    Name = "${var.name}-private-${element(var.azs, count.index)}"
+    Name = "${var.name}-private-${element(var.private_subnets, count.index)}"
     Terraform = "Terraform"
     Created = "${var.owner}"
   }
