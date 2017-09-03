@@ -41,39 +41,39 @@ resource "aws_route" "public_internet_gateway" {
 
 ## private routes
 
-resource "aws_route_table" "private" {
-  vpc_id           = "${aws_vpc.vpc.id}"
-  propagating_vgws = ["${var.private_propagating_vgws}"]
-  count            = "${length(var.private_subnets)}"
+#resource "aws_route_table" "private" {
+#  vpc_id           = "${aws_vpc.vpc.id}"
+#  propagating_vgws = ["${var.private_propagating_vgws}"]
+#  count            = "${length(var.private_subnets)}"
 
-  tags {
-    Name = "${var.name}-rt-private-${element(var.private_subnets, count.index)}"
-    Terraform = "Terraform"
-    Created = "${var.owner}"
-  }
-}
+#  tags {
+#    Name = "${var.name}-rt-private-${element(var.private_subnets, count.index)}"
+#    Terraform = "Terraform"
+#    Created = "${var.owner}"
+#  }
+#}
 
-resource "aws_route" "private_nat_gateway" {
-  route_table_id         = "${element(aws_route_table.private.*.id, count.index)}"
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = "${element(aws_nat_gateway.natgw.*.id, count.index)}"
-  count                  = "${length(var.private_subnets) * lookup(map(var.enable_nat_gateway, 1), "true", 0)}"
-}
+#resource "aws_route" "private_nat_gateway" {
+#  route_table_id         = "${element(aws_route_table.private.*.id, count.index)}"
+#  destination_cidr_block = "0.0.0.0/0"
+#  nat_gateway_id         = "${element(aws_nat_gateway.natgw.*.id, count.index)}"
+#  count                  = "${length(var.private_subnets) * lookup(map(var.enable_nat_gateway, 1), "true", 0)}"
+#}
 
 ## nat gateway
 
-resource "aws_eip" "nateip" {
-  vpc   = true
-  count = "${length(var.azs) * lookup(map(var.enable_nat_gateway, 1), "true", 0)}"
-}
+#resource "aws_eip" "nateip" {
+#  vpc   = true
+#  count = "${length(var.azs) * lookup(map(var.enable_nat_gateway, 1), "true", 0)}"
+#}
 
-resource "aws_nat_gateway" "natgw" {
-  allocation_id = "${element(aws_eip.nateip.*.id, count.index)}"
-  subnet_id     = "${element(aws_subnet.public.*.id, count.index)}"
-  count         = "${length(var.azs) * lookup(map(var.enable_nat_gateway, 1), "true", 0)}"
+#resource "aws_nat_gateway" "natgw" {
+#  allocation_id = "${element(aws_eip.nateip.*.id, count.index)}"
+#  subnet_id     = "${element(aws_subnet.public.*.id, count.index)}"
+#  count         = "${length(var.azs) * lookup(map(var.enable_nat_gateway, 1), "true", 0)}"
 
-  depends_on = ["aws_internet_gateway.igw"]
-}
+#  depends_on = ["aws_internet_gateway.igw"]
+#}
 
 ## public subnets
 ##
@@ -101,23 +101,23 @@ resource "aws_route_table_association" "public" {
 }
 
 
-resource "aws_subnet" "private" {
-  vpc_id            = "${aws_vpc.vpc.id}"
-  cidr_block        = "${var.private_subnets[count.index]}"
-  availability_zone = "${var.azs[count.index]}"
-  count             = "${length(var.private_subnets)}"
+#resource "aws_subnet" "private" {
+#  vpc_id            = "${aws_vpc.vpc.id}"
+#  cidr_block        = "${var.private_subnets[count.index]}"
+#  availability_zone = "${var.azs[count.index]}"
+#  count             = "${length(var.private_subnets)}"
 
-  tags {
-    Name = "${var.name}-private-${element(var.private_subnets, count.index)}"
-    Terraform = "Terraform"
-    Created = "${var.owner}"
-  }
-}
+#  tags {
+#    Name = "${var.name}-private-${element(var.private_subnets, count.index)}"
+#    Terraform = "Terraform"
+#    Created = "${var.owner}"
+#  }
+#}
 
-resource "aws_route_table_association" "private" {
-  count          = "${length(var.private_subnets)}"
-  subnet_id      = "${element(aws_subnet.private.*.id, count.index)}"
-  route_table_id = "${element(aws_route_table.private.*.id, count.index)}"
+#resource "aws_route_table_association" "private" {
+#  count          = "${length(var.private_subnets)}"
+#  subnet_id      = "${element(aws_subnet.private.*.id, count.index)}"
+#  route_table_id = "${element(aws_route_table.private.*.id, count.index)}"
 
-  depends_on = ["aws_subnet.private"]
-}
+#  depends_on = ["aws_subnet.private"]
+#}
